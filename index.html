@@ -1,17 +1,108 @@
-<h1>Backbone Tetris</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Backbone Tetris</title>
+  <style>
+    #grid {
+      position: relative;
+      width: 300px;   /* 10 colunas * 30px */
+      height: 600px;  /* 20 linhas * 30px */
+      border: 1px solid #333;
+      margin-top: 10px;
+      background: #000; /* fundo preto do grid */
+    }
+    .square {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #444;
+      box-sizing: border-box;
+      position: absolute;
+      background-color: #0ff; /* cor inicial */
+    }
+  </style>
+</head>
 <body>
-<p>Implementation of Tetris in backbone.js</p>
-<div id="controls">
-  <button id="pause">Pause (p)</button>
-  <button id="mute">Mute (m)</button>
-  <button id="new_game">New Game (n)</button>
-</div>
-<div id="board">
-  <canvas width="300" height="500"></canvas>
-  <div id="gridContainer">
-    <div class="grid"></div>
-  </div>
-  <div id="message"></div>
-</div>
-<div id="grid" style="position: relative; width: 300px; height: 600px; border: 1px solid #333; margin-top: 10px;"></div>
+
+  <h1>Backbone Tetris</h1>
+  <p>Implementation of Tetris in backbone.js</p>
+
+  <button>Pause (p)</button>
+  <button>Mute (m)</button>
+  <button>New Game (n)</button>
+
+  <div id="grid"></div>
+
+  <!-- Backbone.js e Underscore.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.5.0/backbone-min.js"></script>
+
+  <script>
+    // Modelo para um quadradinho
+    const Square = Backbone.Model.extend({
+      defaults: {
+        x: 0,
+        y: 0,
+        color: '#0ff'
+      }
+    });
+
+    // Coleção de quadradinhos
+    const Squares = Backbone.Collection.extend({
+      model: Square
+    });
+
+    // View para um quadradinho
+    const SquareView = Backbone.View.extend({
+      tagName: 'div',
+      className: 'square',
+      initialize() {
+        this.listenTo(this.model, 'change', this.render);
+      },
+      render() {
+        const x = this.model.get('x');
+        const y = this.model.get('y');
+        const color = this.model.get('color');
+        this.$el.css({
+          left: x * 30 + 'px',
+          top: y * 30 + 'px',
+          backgroundColor: color
+        });
+        return this;
+      }
+    });
+
+    // View do grid que contém todos os quadradinhos
+    const GridView = Backbone.View.extend({
+      el: '#grid',
+      initialize() {
+        this.collection = new Squares();
+
+        // Exemplo: preencher grid com alguns quadradinhos
+        // Aqui só para teste: colocamos um quadrado em (0,0), (1,0), (2,0), (3,0)
+        this.collection.add([
+          { x: 0, y: 0, color: 'cyan' },
+          { x: 1, y: 0, color: 'cyan' },
+          { x: 2, y: 0, color: 'cyan' },
+          { x: 3, y: 0, color: 'cyan' }
+        ]);
+
+        this.render();
+      },
+      render() {
+        this.$el.empty();
+        this.collection.each(square => {
+          const view = new SquareView({ model: square });
+          this.$el.append(view.render().el);
+        });
+      }
+    });
+
+    // Inicializa o grid no carregamento da página
+    document.addEventListener('DOMContentLoaded', () => {
+      new GridView();
+    });
+  </script>
+
 </body>
+</html>
